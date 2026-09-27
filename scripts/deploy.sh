@@ -10,7 +10,7 @@ cd "$(dirname "$0")/.."
 old=$(git rev-parse HEAD)
 git pull --ff-only
 new=$(git rev-parse HEAD)
-changed=$(git diff --name-only "$old" "$new")
+changed=$(git -c core.quotePath=false diff --name-only "$old" "$new")
 
 if [ -z "$changed" ]; then
   echo "Новых коммитов нет."

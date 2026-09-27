@@ -5,24 +5,36 @@
       "sha1": "5eb201c0b9f78b23af99a84d71358b964f013192"
     },
     "MediaWiki:Sidebar": {
-      "revid": 33,
-      "sha1": "41f2c7c42ce174397a31f1eab036f6ede8fffc4c"
+      "revid": 49,
+      "sha1": "a41afe0707cdcf662dca184a73f2dfb94d1a66af"
     },
     "Домены и DNS": {
-      "revid": 19,
-      "sha1": "570219fb46e715001d38c49e16cc3d5999ce3b85"
+      "revid": 44,
+      "sha1": "cdbe0162f8d546a00e67adfc96bcb0fbe783fd47"
+    },
+    "Доступы": {
+      "revid": 43,
+      "sha1": "cdd6992467ff40a5b88d9d8cac22ad51cb718186"
     },
     "Заглавная страница": {
       "revid": 8,
       "sha1": "3429f7e8c111a1fa1d26d81d1b229d331de04e89"
     },
     "Интернет на М4": {
-      "revid": 29,
-      "sha1": "7f77f3a5b0a2ccfc53949800783fa1dbe8520700"
+      "revid": 46,
+      "sha1": "77ea70e1dfc54aecead7cb0fe8fd7f12d3ff86ca"
+    },
+    "Как править вики": {
+      "revid": 39,
+      "sha1": "2a28901d7e207852f625d29631fc30b6faabc286"
     },
     "Категория:М4": {
       "revid": 22,
       "sha1": "5ae1ed88a8263c903310e0daddcb11df773c1cd2"
+    },
+    "Категория:Общежитие": {
+      "revid": 35,
+      "sha1": "af3d59dabad91473545411d0a110f314d1ee37b0"
     },
     "Категория:Сайт и онлайн-сервисы": {
       "revid": 21,
@@ -40,17 +52,29 @@
       "revid": 23,
       "sha1": "5228b097947a4b37877294fd40488e12b61c56fe"
     },
+    "Категория:Участникам отдела": {
+      "revid": 38,
+      "sha1": "fd18c1c3aab5db77f142a91286b0d9ac97fef2b8"
+    },
     "Категория:Шаблоны": {
       "revid": 26,
       "sha1": "aad892550a92598724ebc758f2788721c46febec"
+    },
+    "Принтеры": {
+      "revid": 40,
+      "sha1": "1f23b0fd1608d44c22f8043800e0b3516fe698e1"
+    },
+    "Пропускная система в прачечной": {
+      "revid": 45,
+      "sha1": "9cabcc09917e2c79eaee7513bf30b5d42fafc81c"
     },
     "Роутер на М4": {
       "revid": 30,
       "sha1": "0d96a2e498d0946939d43aee5747941ed98a3a23"
     },
     "С чего начать": {
-      "revid": 32,
-      "sha1": "2dab8570705a2c9f2535c350a86590bc86f803be"
+      "revid": 48,
+      "sha1": "d8fc7ac20733204be0fd6ba4cbb2bfd84e7de463"
     },
     "Сервер сайта": {
       "revid": 28,
@@ -65,8 +89,8 @@
       "sha1": "17d6b1d1f98a347e3a278ef8a66619b44dd600f2"
     },
     "Факультетский сервер": {
-      "revid": 31,
-      "sha1": "e3fbc3063fca9c471fb50a72a566afc052184ace"
+      "revid": 47,
+      "sha1": "7c6ffab8558cc35044162a381ca109b45da10594"
     },
     "Шаблон:TODO": {
       "revid": 3,
