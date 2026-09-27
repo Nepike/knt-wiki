@@ -13,9 +13,13 @@
     python scripts/wiki.py check                         проверить вход по бот-паролю, ничего не меняет
     python scripts/wiki.py status                        состояние всех черновиков относительно вики
     python scripts/wiki.py pull "Заглавная страница"     скачать текущую версию страницы в articles/
+                                                         (можно указать и путь к черновику: "articles/X.wiki")
     python scripts/wiki.py diff "articles/X.wiki"        разница: вики -> черновик
     python scripts/wiki.py publish "articles/X.wiki" -m "что изменено"
                                                          показать diff, спросить подтверждение, сохранить
+    python scripts/wiki.py upload "articles/Файл/X.png" -m "что на картинке"
+                                                         загрузить картинку как «Файл:X.png»; уже загруженный
+                                                         другой файл с тем же именем заменяется только с --replace
 
 Настройки берутся из .env (переменные окружения имеют приоритет):
     WIKI_URL=https://wiki.inbicst.ru
@@ -25,6 +29,7 @@
 import argparse
 import difflib
 import hashlib
+import io
 import json
 import os
 import sys
@@ -131,7 +136,7 @@ def read_draft(path):
 
 def cmd_check(site, env, args):
     info = site.api("query", meta="userinfo", uiprop="rights|groups")["query"]["userinfo"]
-    needed = ["edit", "createpage", "editinterface"]
+    needed = ["edit", "createpage", "editinterface", "upload", "reupload"]
     print(f"Вики: {env['WIKI_URL']}, вход как: {info['name']} (группы: {', '.join(info['groups'])})")
     for right in needed:
         print(f"  {right:14} {'есть' if right in info['rights'] else 'НЕТ'}")
@@ -160,6 +165,8 @@ def cmd_status(site, env, args):
 def cmd_pull(site, env, args):
     state = State(env["WIKI_URL"])
     for title in args.titles:
+        if title.endswith(".wiki"):
+            title = path_to_title(title)
         page, text, revid = fetch(site, title)
         title = page.name
         if revid is None:
@@ -228,6 +235,32 @@ def cmd_publish(site, env, args):
     print(f"Опубликовано: r{new_revid} {site.scheme}://{site.host}/wiki/{title.replace(' ', '_')}")
 
 
+def cmd_upload(site, env, args):
+    path = Path(args.path)
+    if not path.is_file():
+        sys.exit(f"Нет файла {path}")
+    name = args.name or path.name
+    data = path.read_bytes()
+    image = site.images[name]
+    if image.exists:
+        if image.imageinfo.get("sha1") == hashlib.sha1(data).hexdigest():
+            print(f"«Файл:{name}» уже загружен, точно такой же.")
+            return
+        if not args.replace:
+            sys.exit(f"«Файл:{name}» уже есть в вики, и он другой. Не перезаписываю; "
+                     f"чтобы заменить, повторите с --replace.")
+
+    print(f"{'Замена' if image.exists else 'Загрузка'} «Файл:{name}» ({max(1, round(len(data) / 1024))} КБ) на {env['WIKI_URL']}")
+    if not args.yes and input("Загрузить? [y/N] ").strip().lower() not in ("y", "yes", "д", "да"):
+        print("Отменено.")
+        return
+    result = site.upload(io.BytesIO(data), filename=name, description=args.message,
+                         comment=args.message, ignore=args.replace)
+    if result.get("result") != "Success":
+        sys.exit(f"Файл не загружен: {result.get('warnings') or result}")
+    print(f"Загружено: {site.scheme}://{site.host}/wiki/Файл:{name.replace(' ', '_')}")
+
+
 def main():
     for stream in (sys.stdout, sys.stderr):
         stream.reconfigure(encoding="utf-8")
@@ -236,7 +269,7 @@ def main():
     sub.add_parser("check")
     sub.add_parser("status")
     p = sub.add_parser("pull")
-    p.add_argument("titles", nargs="+")
+    p.add_argument("titles", nargs="+", help="название страницы или путь к черновику articles/....wiki")
     p.add_argument("--force", action="store_true", help="перезаписать черновик с неопубликованными правками")
     p = sub.add_parser("diff")
     p.add_argument("path")
@@ -244,12 +277,18 @@ def main():
     p.add_argument("path")
     p.add_argument("-m", "--message", required=True, help="описание правки")
     p.add_argument("--yes", action="store_true", help="не спрашивать подтверждение")
+    p = sub.add_parser("upload")
+    p.add_argument("path")
+    p.add_argument("--name", help="имя файла в вики (по умолчанию — имя файла на диске)")
+    p.add_argument("-m", "--message", required=True, help="описание файла")
+    p.add_argument("--replace", action="store_true", help="заменить уже загруженный файл с тем же именем")
+    p.add_argument("--yes", action="store_true", help="не спрашивать подтверждение")
     args = parser.parse_args()
 
     env = load_env()
     site = connect(env)
     {"check": cmd_check, "status": cmd_status, "pull": cmd_pull,
-     "diff": cmd_diff, "publish": cmd_publish}[args.command](site, env, args)
+     "diff": cmd_diff, "publish": cmd_publish, "upload": cmd_upload}[args.command](site, env, args)
 
 
 if __name__ == "__main__":

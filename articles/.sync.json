@@ -1,32 +1,36 @@
 {
   "https://wiki.inbicst.ru": {
+    "Google Workspace": {
+      "revid": 72,
+      "sha1": "c06dfdc7ad2223cbf6c749904eeb375bdc1231b1"
+    },
     "MediaWiki:Mainpage": {
       "revid": 6,
       "sha1": "5eb201c0b9f78b23af99a84d71358b964f013192"
     },
     "MediaWiki:Sidebar": {
-      "revid": 49,
-      "sha1": "a41afe0707cdcf662dca184a73f2dfb94d1a66af"
+      "revid": 56,
+      "sha1": "4507603ba91f410568ac4384e8a068be9737b8c9"
     },
     "Домены и DNS": {
-      "revid": 44,
-      "sha1": "cdbe0162f8d546a00e67adfc96bcb0fbe783fd47"
+      "revid": 59,
+      "sha1": "c7e28466e0a4f4b5165b344ba4cf80a00c182de8"
     },
     "Доступы": {
-      "revid": 43,
-      "sha1": "cdd6992467ff40a5b88d9d8cac22ad51cb718186"
+      "revid": 66,
+      "sha1": "eb6ce9248f18035ac3c30233a11980e2a25cf5c6"
     },
     "Заглавная страница": {
       "revid": 8,
       "sha1": "3429f7e8c111a1fa1d26d81d1b229d331de04e89"
     },
     "Интернет на М4": {
-      "revid": 46,
-      "sha1": "77ea70e1dfc54aecead7cb0fe8fd7f12d3ff86ca"
+      "revid": 73,
+      "sha1": "55fc89dba26d87b942288694b337892dce1dc93d"
     },
     "Как править вики": {
-      "revid": 39,
-      "sha1": "2a28901d7e207852f625d29631fc30b6faabc286"
+      "revid": 68,
+      "sha1": "fab20974be14a0c7cdb010196e414fb04789431a"
     },
     "Категория:М4": {
       "revid": 22,
@@ -60,45 +64,49 @@
       "revid": 26,
       "sha1": "aad892550a92598724ebc758f2788721c46febec"
     },
+    "Компьютерный класс": {
+      "revid": 50,
+      "sha1": "179bb9db7456e6d2a2a77be8135dc89a99730eb1"
+    },
     "Принтеры": {
       "revid": 40,
       "sha1": "1f23b0fd1608d44c22f8043800e0b3516fe698e1"
     },
     "Пропускная система в прачечной": {
-      "revid": 45,
-      "sha1": "9cabcc09917e2c79eaee7513bf30b5d42fafc81c"
+      "revid": 63,
+      "sha1": "14f3d3d4900a8bcbbc9f52d2233ed5e899b07ead"
     },
     "Роутер на М4": {
-      "revid": 30,
-      "sha1": "0d96a2e498d0946939d43aee5747941ed98a3a23"
+      "revid": 61,
+      "sha1": "aefbc1e01649eeaeff191c6b61f4b0a7a47097f8"
     },
     "С чего начать": {
-      "revid": 48,
-      "sha1": "d8fc7ac20733204be0fd6ba4cbb2bfd84e7de463"
+      "revid": 65,
+      "sha1": "80e89c01f49a55355a95bc984f6cc817db2bf0cb"
     },
     "Сервер сайта": {
-      "revid": 28,
-      "sha1": "29f07e21b70e3990699e06a1644c5568158632d1"
+      "revid": 67,
+      "sha1": "d54e97c3dbb0342a5534121db2e3c8a10410698e"
     },
     "Студсайт": {
-      "revid": 27,
-      "sha1": "39843feffb06d4330f90b1c5a13ac4891e831df7"
+      "revid": 58,
+      "sha1": "ede7cc739dfe2fb91d02dd3894bc79b6c13ec70a"
     },
     "Участник:Nepike": {
       "revid": 18,
       "sha1": "17d6b1d1f98a347e3a278ef8a66619b44dd600f2"
     },
     "Факультетский сервер": {
-      "revid": 47,
-      "sha1": "7c6ffab8558cc35044162a381ca109b45da10594"
+      "revid": 62,
+      "sha1": "de6f0643bf6d32f9c9080cb44e7278e818c3ab00"
     },
     "Шаблон:TODO": {
       "revid": 3,
       "sha1": "6adcc3e486a6f8f6a3274239db8cede8f4e429d0"
     },
     "Шаблон:Заготовка страницы": {
-      "revid": 20,
-      "sha1": "788d7eccb4965a117bf2bd88ed7bb82c5d5ac625"
+      "revid": 69,
+      "sha1": "abd543a298d91a8dfc7d79d755e7c60b411aa01b"
     },
     "Шаблон:Статус страницы": {
       "revid": 2,

@@ -7,12 +7,14 @@
 #   SHA256SUMS
 # .env в бэкап не входит: храните его отдельно (без него восстановится всё, кроме активных сессий).
 #
-# Запуск из корня репозитория:  bash scripts/backup.sh [папка-назначения]
+# Запуск из корня репозитория:  bash scripts/backup.sh [папка-назначения]   (по умолчанию backups/)
 set -euo pipefail
+OUT=""
+if [ -n "${1:-}" ]; then mkdir -p "$1"; OUT="$(cd "$1" && pwd)"; fi  # путь — относительно текущей папки
 cd "$(dirname "$0")/.."
 export MSYS_NO_PATHCONV=1
 
-DEST="${1:-backups}/itwiki-$(date +%Y%m%d-%H%M%S)"
+DEST="${OUT:-backups}/itwiki-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$DEST"
 
 echo "БД..."
