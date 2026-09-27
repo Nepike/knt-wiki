@@ -69,6 +69,7 @@ VisualEditor, SyntaxHighlight_GeSHi, ParserFunctions, TemplateData.
 | SSH | `ssh nepike@inbicst.ru` (Ubuntu 24.04) |
 | Репозиторий на сервере | `/srv/knt-wiki` |
 | Контейнеры | compose-проект `itwiki`, MediaWiki слушает только `127.0.0.1:8080` |
+| Фаервол | ufw: входящие только 22, 80, 443 |
 | HTTPS | nginx на хосте (`/etc/nginx/sites-available/wiki.inbicst.ru`), сертификат Let's Encrypt от certbot, продлевается `certbot.timer` |
 
 На сервере работают и другие проекты (сайт `knt` в `/srv/knt`, сайт olgapostovalova.ru) —

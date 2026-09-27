@@ -41,13 +41,18 @@ $wgUsePathInfo = true;
 $wgCdnServersNoPurge = [ '172.16.0.0/12' ];
 
 ## Логотип КНТ | ИНБИКСТ (файлы в ./assets, исходник с прозрачным фоном — assets/logo-source.png).
-## 'icon' — шестиугольник для шапки Vector 2022, '1x'/'2x' — логотип со скобками для других тем.
+## 'icon' — шапка Vector 2022 (шестиугольник со стрелками), '1x'/'2x' — для других тем.
 $wgLogos = [
 	'1x' => "$wgResourceBasePath/assets/logo-135.png",
 	'2x' => "$wgResourceBasePath/assets/logo-270.png",
-	'icon' => "$wgResourceBasePath/assets/logo-icon.png",
+	'icon' => "$wgResourceBasePath/assets/logo-header.png",
 ];
 $wgFavicon = "$wgResourceBasePath/assets/favicon.ico";
+
+## Vector 2022 рисует иконку квадратом 50×50; наш логотип со стрелками шире (179×100 → 89×50).
+$wgHooks['BeforePageDisplay'][] = static function ( OutputPage $out ) {
+	$out->addInlineStyle( '.mw-logo .mw-logo-icon { width: 89px; height: 50px; }' );
+};
 
 ## Язык и время
 $wgLanguageCode = "ru";

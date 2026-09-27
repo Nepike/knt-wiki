@@ -1,11 +1,12 @@
 # CLAUDE.md — контекст для следующих сессий
 
 Новая вики IT-отдела студсовета факультета на MediaWiki: база знаний для новичков.
-Старая вики (wiki.inbicst.ru) устарела, её контент НЕ переносим, пишем заново.
+Прод: **https://wiki.inbicst.ru**. Старая вики (MediaWiki 1.26) снесена, её контент НЕ переносим, пишем заново.
 
 ## Правила работы (от владельца репозитория)
 
-- **Не коммитить и не пушить.** Это делает только владелец. Остальной git (status, diff, add и т.п.) можно.
+- **Не коммитить и не пушить.** Это делает только владелец. Остальной git (status, diff и т.п.) можно;
+  изменения оставлять неиндексированными — владелец сам решает, что коммитить.
   Репозиторий: https://github.com/Nepike/knt-wiki (публичный). Сервер забирает код оттуда (`git pull`),
   поэтому перед деплоем изменений владелец должен закоммитить и запушить.
 - **sudo на сервере выполняет владелец сам** (у `nepike` sudo с паролем). Готовить для него точные команды.
@@ -16,21 +17,29 @@
 - В статьях не выдумывать факты об отделе: спрашивать или ставить заметную пометку TODO.
 - Никаких паролей/токенов/ключей в статьях — только у кого/где их получить.
 - Перед правкой существующей статьи сначала скачать её текущую версию из вики (могли править в браузере).
+- Статьи публикуются сразу в боевую вики, только после одобрения владельца.
 
 ## Статус этапов
 
 - [x] **Этап 1. Локальный запуск** — сделано и подтверждено 2026-09-27.
-- [ ] **Этап 2. Деплой на VPS** (`ssh nepike@inbicst.ru`, ключ владельца `~/.ssh/id_rsa`). План одобрен 2026-09-27.
-  - [x] Осмотр сервера (см. «Сервер» ниже).
-  - [x] Бэкап старой вики: на сервере `~/backups/old-wiki-2026-09-27/`, локально `backups/old-wiki-2026-09-27/`
-        (SHA256 сверены; `pages-text/` — тексты страниц, извлечены из SQLite).
-  - [x] Репозиторий подготовлен: лимиты памяти, конфиг nginx, backup/restore (проверены на изолированной копии), README.
-  - [ ] Владелец коммитит/пушит, создаёт `/srv/knt-wiki` (sudo), включает ufw (порт 5001).
-  - [ ] Клонировать в `/srv/knt-wiki`, `.env` сгенерировать на сервере, `install.sh` → 127.0.0.1:8080.
-  - [ ] Владелец переключает nginx (`deploy/nginx/wiki.inbicst.ru.conf`), `certbot renew --dry-run`.
-  - [ ] Снос старой вики владельцем: `systemctl disable --now php8.3-fpm`, удалить `/opt/it.inbicst.ru`, `/opt/wiki.zip`.
-  - [ ] Описание и теги репозитория на английском для GitHub.
+- [x] **Этап 2. Деплой на VPS** — сделано 2026-09-27, ждёт подтверждения владельца.
+  - Бэкап старой вики: на сервере `~/backups/old-wiki-2026-09-27/`, локально `backups/old-wiki-2026-09-27/`
+    (SHA256 сверены; `pages-text/` — тексты 38 старых страниц, извлечены из SQLite, для справки).
+  - Вики в `/srv/knt-wiki`, `.env` сгенерирован на сервере (chmod 600), nginx переключён, certbot dry-run ок.
+  - Старая вики удалена владельцем, php8.3-fpm остановлен и отключён.
+  - Последняя правка логотипа (широкий `logo-header.png` со стрелками) ждёт commit/push владельца и `git pull` на сервере.
 - [ ] **Этап 3. Статьи** (публикация через API с бот-паролем, черновики в `articles/`).
+
+## Как деплоить
+
+Подробно — README. Коротко: владелец пушит → на сервере
+`cd /srv/knt-wiki && git pull && docker compose up -d`. Изменения `LocalSettings.php` и `assets/` применяются
+сразу (bind-mount). Конфиг nginx (`deploy/nginx/`) копирует владелец через sudo.
+Перед обновлением версии MediaWiki — `bash scripts/backup.sh`.
+
+## Как публиковать статьи
+
+TODO (этап 3): бот-пароль в `.env`, скрипт публикации через API (mwclient), черновики `articles/*.wiki`.
 
 ## Принятые решения
 
@@ -48,12 +57,14 @@
 - Загрузки файлов включены для зарегистрированных: png, gif, jpg, jpeg, webp, pdf; лимит 20 МБ (`php/uploads.ini`).
 - Расширения (одобрены владельцем): VisualEditor, SyntaxHighlight_GeSHi, ParserFunctions, TemplateData.
   Отклонены/не выбраны: WikiEditor, OATHAuth, Cite, ReplaceText. Новые — только с одобрения.
-- Администратор: `Admin` (логин и пароль в `.env`: `MW_ADMIN_USER`, `MW_ADMIN_PASSWORD`).
-- Логотип: `assets/logo-source.png` (КНТ | ИНБИКСТ, прозрачный фон) → `logo-icon.png` (шестиугольник, шапка
-  Vector 2022), `logo-135/270.png`, `favicon.ico`. Каталог `assets/` монтируется в `/var/www/html/assets`.
-- Домен: `wiki.inbicst.ru` (тот же, что у старой вики; сертификат certbot уже есть, до 2026-12-04, автопродление).
+- Администратор: `Admin` (логин и пароль в `.env`: `MW_ADMIN_USER`, `MW_ADMIN_PASSWORD`; на сервере свой пароль).
+- Логотип: `assets/logo-source.png` (КНТ | ИНБИКСТ, прозрачный фон, от владельца) →
+  `logo-header.png` (стрелки + шестиугольник, 179×100, в шапке Vector 2022 показывается 89×50 — размер задан
+  inline-стилем через хук BeforePageDisplay в LocalSettings.php), `logo-135/270.png` (другие темы), `favicon.ico`
+  (только шестиугольник). Каталог `assets/` монтируется в `/var/www/html/assets`.
+- Домен: `wiki.inbicst.ru` (сертификат certbot, до 2026-12-04, автопродление certbot.timer).
 - Память: MariaDB `innodb_buffer_pool_size=32M`, performance_schema off (`mariadb/low-memory.cnf`);
-  Apache MaxRequestWorkers 8 (`apache/mpm-limits.conf`); mem_limit db 256m, mediawiki 384m. Стек ≈ 145 МБ.
+  Apache MaxRequestWorkers 8 (`apache/mpm-limits.conf`); mem_limit db 256m, mediawiki 384m. Стек ≈ 135–145 МБ.
 - `$wgCdnServersNoPurge = ['172.16.0.0/12']` — доверять X-Forwarded-For от nginx через docker-сеть.
 - nosniff для статики/загрузок ставит nginx (`proxy_hide_header` + `add_header`), там же HSTS.
 - Регулярный cron-бэкап владелец НЕ хочет — бэкапы вручную `scripts/backup.sh`.
@@ -65,27 +76,39 @@ python scripts/gen_env.py > .env
 bash scripts/install.sh           # http://localhost:8080
 ```
 
-## Сервер (осмотр 2026-09-27)
+## Сервер
 
-- Ubuntu 24.04.3, 2 CPU, **1.8 ГБ RAM** (занято ~1.5 ГБ, своп 1.3/2 ГБ), диск 58 ГБ (свободно 19).
-- nginx 1.24 на хосте (80/443), certbot (nginx authenticator) + certbot.timer. ufw был выключен.
-- Чужие проекты, НЕ трогать: docker-проект `knt` в `/srv/knt` (сайт knt-mipt.ru, inbicst.ru → редирект туда,
-  web на 127.0.0.1:8001, gunicorn ~830 МБ); olgapostovalova.ru (pm2, пользователь user_postovalova,
-  gunicorn через unix-сокет + webhook_listener.py на 0.0.0.0:5001); MariaDB на хосте 127.0.0.1:3306 (не наша).
-- Старая вики: MediaWiki 1.26.2, `/opt/it.inbicst.ru`, SQLite (`data/my_wiki.sqlite`), php8.3-fpm
-  (используется только ею). Экспорт через Special:Export/API сломан (TypeError на PHP 8.3).
-  38 страниц, 117 правок, последняя правка 2024-10. Темы: Cloudflare, Git/GitLab, SSH, Wi-Fi, роутер,
-  принтер, телеграм-боты, сайт, серверы, склад, кабинет студсовета и т.п. — для справки при написании статей.
+- Ubuntu 24.04.3, 2 CPU, **1.8 ГБ RAM** (впритык, своп активно используется), диск 58 ГБ.
+- nginx 1.24 на хосте (80/443), certbot (nginx authenticator) + certbot.timer.
+- ufw включён 2026-09-27: входящие только 22, 80, 443. logrotate установлен 2026-09-27 (раньше не было).
+- Чужие проекты, НЕ трогать: docker-проект `knt` в `/srv/knt` (сайт knt-mipt.ru; inbicst.ru, fnbic.ru →
+  редирект туда; web на 127.0.0.1:8001); olgapostovalova.ru (pm2, пользователь user_postovalova,
+  gunicorn через unix-сокет + webhook_listener.py на 127.0.0.1:5001); MariaDB на хосте 127.0.0.1:3306 (не наша).
+- Старая вики (снесена): была MediaWiki 1.26.2 на SQLite в `/opt/it.inbicst.ru`. Темы старых страниц:
+  Cloudflare, Git/GitLab, SSH, Wi-Fi, роутер, принтер, телеграм-боты, сайт, серверы, склад, кабинет
+  студсовета, пропускная система — можно использовать как подсказку, о чём спросить владельца (не как факты).
 
 ## Открытые вопросы / TODO
 
 - SMTP для почты (сброс паролей) — если понадобится.
-- webhook olgapostovalova.ru (`/deploy_webhook`) запускает деплой по любому POST без проверки секрета —
-  сообщено владельцу, это чужой проект.
+- `/srv/postovalova-website/config.yml` (токены) всё ещё world-readable (664) — владельцу предложен `chmod 600`.
+- olgapostovalova.ru (репозиторий Nepike/work_postovalova, локально `Desktop/work_postovalova`) — сделано
+  по просьбе владельца: `webhook_listener.py` с проверкой HMAC `X-Hub-Signature-256` по `deploy_secret`
+  из config.yml, только push в main, flock, bind 127.0.0.1 (выкачено, неподписанный POST → 403);
+  error.log очищен, /etc/logrotate.d/postovalova-website. Причина роста лога — телеграм-бот не может
+  стабильно достучаться до Telegram API (не исправлялось).
+
+## Заметки для тестов
+
+- Запросы к `http://127.0.0.1:8080` с заголовком `X-Forwarded-Proto: https` получают Secure-cookie,
+  и логин через API по http не проходит — это нормально, в тестах этот заголовок не передавать.
+- Тестовые прогоны install/backup/restore делать в копии репозитория в scratchpad с другим `name:` в compose
+  и портом 8081, потом `docker compose down -v` в этой копии.
 
 ## Особенности окружения (Windows владельца)
 
 - Git Bash: при передаче путей вида `/tmp` в docker нужен `MSYS_NO_PATHCONV=1`.
 - Python в консоли: `PYTHONIOENCODING=utf-8`, иначе падает на кириллице.
 - curl в Git Bash портит кириллицу в аргументах — для API с русскими заголовками использовать Python.
-- `core.autocrlf=true`, поэтому в репозитории `.gitattributes` с `eol=lf`.
+- `core.autocrlf=true`, поэтому в репозитории `.gitattributes` с `eol=lf`. Python `write_text` на Windows
+  пишет CRLF — передавать `newline="\n"`.
