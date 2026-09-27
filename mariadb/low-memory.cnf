@@ -1,0 +1,13 @@
+# Настройки MariaDB для сервера с 2 ГБ RAM (вики маленькая, данных — единицы МБ).
+# Монтируется в /etc/mysql/conf.d/ контейнера db.
+[mariadb]
+innodb_buffer_pool_size = 32M
+innodb_log_buffer_size  = 4M
+performance_schema      = OFF
+max_connections         = 30
+key_buffer_size         = 8M
+tmp_table_size          = 16M
+max_heap_table_size     = 16M
+table_open_cache        = 400
+thread_cache_size       = 4
+skip-name-resolve

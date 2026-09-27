@@ -6,6 +6,10 @@
 ## Правила работы (от владельца репозитория)
 
 - **Не коммитить и не пушить.** Это делает только владелец. Остальной git (status, diff, add и т.п.) можно.
+  Репозиторий: https://github.com/Nepike/knt-wiki (публичный). Сервер забирает код оттуда (`git pull`),
+  поэтому перед деплоем изменений владелец должен закоммитить и запушить.
+- **sudo на сервере выполняет владелец сам** (у `nepike` sudo с паролем). Готовить для него точные команды.
+- Безвозвратное удаление данных (rm -rf и т.п.) не выполнять самому — давать команду владельцу.
 - Работаем по этапам; после каждого этапа остановиться, показать результат, ждать подтверждения.
 - На сервере: команды, которые удаляют, перезаписывают или перезапускают существующие сервисы, —
   только после явного «да» владельца.
@@ -15,8 +19,17 @@
 
 ## Статус этапов
 
-- [x] **Этап 1. Локальный запуск** — сделано 2026-09-27, ждёт подтверждения владельца.
-- [ ] **Этап 2. Деплой на VPS** (`ssh nepike@inbicst.ru`, ключ владельца `~/.ssh/id_rsa`).
+- [x] **Этап 1. Локальный запуск** — сделано и подтверждено 2026-09-27.
+- [ ] **Этап 2. Деплой на VPS** (`ssh nepike@inbicst.ru`, ключ владельца `~/.ssh/id_rsa`). План одобрен 2026-09-27.
+  - [x] Осмотр сервера (см. «Сервер» ниже).
+  - [x] Бэкап старой вики: на сервере `~/backups/old-wiki-2026-09-27/`, локально `backups/old-wiki-2026-09-27/`
+        (SHA256 сверены; `pages-text/` — тексты страниц, извлечены из SQLite).
+  - [x] Репозиторий подготовлен: лимиты памяти, конфиг nginx, backup/restore (проверены на изолированной копии), README.
+  - [ ] Владелец коммитит/пушит, создаёт `/srv/knt-wiki` (sudo), включает ufw (порт 5001).
+  - [ ] Клонировать в `/srv/knt-wiki`, `.env` сгенерировать на сервере, `install.sh` → 127.0.0.1:8080.
+  - [ ] Владелец переключает nginx (`deploy/nginx/wiki.inbicst.ru.conf`), `certbot renew --dry-run`.
+  - [ ] Снос старой вики владельцем: `systemctl disable --now php8.3-fpm`, удалить `/opt/it.inbicst.ru`, `/opt/wiki.zip`.
+  - [ ] Описание и теги репозитория на английском для GitHub.
 - [ ] **Этап 3. Статьи** (публикация через API с бот-паролем, черновики в `articles/`).
 
 ## Принятые решения
@@ -36,6 +49,14 @@
 - Расширения (одобрены владельцем): VisualEditor, SyntaxHighlight_GeSHi, ParserFunctions, TemplateData.
   Отклонены/не выбраны: WikiEditor, OATHAuth, Cite, ReplaceText. Новые — только с одобрения.
 - Администратор: `Admin` (логин и пароль в `.env`: `MW_ADMIN_USER`, `MW_ADMIN_PASSWORD`).
+- Логотип: `assets/logo-source.png` (КНТ | ИНБИКСТ, прозрачный фон) → `logo-icon.png` (шестиугольник, шапка
+  Vector 2022), `logo-135/270.png`, `favicon.ico`. Каталог `assets/` монтируется в `/var/www/html/assets`.
+- Домен: `wiki.inbicst.ru` (тот же, что у старой вики; сертификат certbot уже есть, до 2026-12-04, автопродление).
+- Память: MariaDB `innodb_buffer_pool_size=32M`, performance_schema off (`mariadb/low-memory.cnf`);
+  Apache MaxRequestWorkers 8 (`apache/mpm-limits.conf`); mem_limit db 256m, mediawiki 384m. Стек ≈ 145 МБ.
+- `$wgCdnServersNoPurge = ['172.16.0.0/12']` — доверять X-Forwarded-For от nginx через docker-сеть.
+- nosniff для статики/загрузок ставит nginx (`proxy_hide_header` + `add_header`), там же HSTS.
+- Регулярный cron-бэкап владелец НЕ хочет — бэкапы вручную `scripts/backup.sh`.
 
 ## Как запустить локально
 
@@ -44,13 +65,23 @@ python scripts/gen_env.py > .env
 bash scripts/install.sh           # http://localhost:8080
 ```
 
+## Сервер (осмотр 2026-09-27)
+
+- Ubuntu 24.04.3, 2 CPU, **1.8 ГБ RAM** (занято ~1.5 ГБ, своп 1.3/2 ГБ), диск 58 ГБ (свободно 19).
+- nginx 1.24 на хосте (80/443), certbot (nginx authenticator) + certbot.timer. ufw был выключен.
+- Чужие проекты, НЕ трогать: docker-проект `knt` в `/srv/knt` (сайт knt-mipt.ru, inbicst.ru → редирект туда,
+  web на 127.0.0.1:8001, gunicorn ~830 МБ); olgapostovalova.ru (pm2, пользователь user_postovalova,
+  gunicorn через unix-сокет + webhook_listener.py на 0.0.0.0:5001); MariaDB на хосте 127.0.0.1:3306 (не наша).
+- Старая вики: MediaWiki 1.26.2, `/opt/it.inbicst.ru`, SQLite (`data/my_wiki.sqlite`), php8.3-fpm
+  (используется только ею). Экспорт через Special:Export/API сломан (TypeError на PHP 8.3).
+  38 страниц, 117 правок, последняя правка 2024-10. Темы: Cloudflare, Git/GitLab, SSH, Wi-Fi, роутер,
+  принтер, телеграм-боты, сайт, серверы, склад, кабинет студсовета и т.п. — для справки при написании статей.
+
 ## Открытые вопросы / TODO
 
-- Логотип отдела (сейчас заглушка `change-your-logo.svg`).
-- Этап 2: заголовок `X-Content-Type-Options: nosniff` отдавать на reverse proxy
-  (в образе mod_headers выключен, поэтому `images/.htaccess` его не ставит).
-- Этап 2: за прокси настроить `$wgCdnServersNoPurge`, чтобы MediaWiki видела реальные IP.
 - SMTP для почты (сброс паролей) — если понадобится.
+- webhook olgapostovalova.ru (`/deploy_webhook`) запускает деплой по любому POST без проверки секрета —
+  сообщено владельцу, это чужой проект.
 
 ## Особенности окружения (Windows владельца)
 

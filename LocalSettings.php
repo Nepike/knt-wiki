@@ -36,11 +36,18 @@ $wgResourceBasePath = $wgScriptPath;
 $wgArticlePath = "/wiki/$1";
 $wgUsePathInfo = true;
 
-## TODO: заменить на логотип отдела
+## На сервере запросы приходят от nginx через docker-сеть: доверяем его X-Forwarded-For,
+## чтобы в истории правок и блокировках были реальные IP, а не адрес шлюза docker.
+$wgCdnServersNoPurge = [ '172.16.0.0/12' ];
+
+## Логотип КНТ | ИНБИКСТ (файлы в ./assets, исходник с прозрачным фоном — assets/logo-source.png).
+## 'icon' — шестиугольник для шапки Vector 2022, '1x'/'2x' — логотип со скобками для других тем.
 $wgLogos = [
-	'1x' => "$wgResourceBasePath/resources/assets/change-your-logo.svg",
-	'icon' => "$wgResourceBasePath/resources/assets/change-your-logo-icon.svg",
+	'1x' => "$wgResourceBasePath/assets/logo-135.png",
+	'2x' => "$wgResourceBasePath/assets/logo-270.png",
+	'icon' => "$wgResourceBasePath/assets/logo-icon.png",
 ];
+$wgFavicon = "$wgResourceBasePath/assets/favicon.ico";
 
 ## Язык и время
 $wgLanguageCode = "ru";

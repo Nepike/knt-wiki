@@ -24,6 +24,9 @@ services:
       MARIADB_AUTO_UPGRADE: "1"
     volumes:
       - db-data:/var/lib/mysql
+      - ./mariadb/low-memory.cnf:/etc/mysql/conf.d/low-memory.cnf:ro
+    # На сервере всего 1.8 ГБ RAM: жёсткие потолки, чтобы вики не вытеснила сайт
+    mem_limit: 256m
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
@@ -42,7 +45,10 @@ services:
     volumes:
       - ./LocalSettings.php:/var/www/html/LocalSettings.php:ro
       - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+      - ./assets:/var/www/html/assets:ro
+      - ./apache/mpm-limits.conf:/etc/apache2/conf-enabled/mpm-limits.conf:ro
       - mw-images:/var/www/html/images
+    mem_limit: 384m
 
   # Только для scripts/install.sh: установщик отказывается работать,
   # если LocalSettings.php уже на месте, поэтому здесь он не монтируется.
