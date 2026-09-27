@@ -1,0 +1,27 @@
+<div class="itwiki-todo" style="margin:0.5em 0; padding:0.4em 0.8em; border:1px solid #fc3; border-left:4px solid #ac6600; background:var(--background-color-warning-subtle,#fef6e7);">'''TODO:''' {{{1|здесь не хватает информации}}}</div>{{#ifeq:{{NAMESPACE}}|{{ns:Template}}||[[Категория:Страницы с TODO]]}}<noinclude>
+Заметная пометка «здесь чего-то не хватает». Все страницы с этой пометкой собираются в [[:Категория:Страницы с TODO]] — оттуда удобно брать, что дописать.
+
+== Как использовать ==
+<pre>
+{{TODO|Кто отвечает за сервер и как с ним связаться}}
+</pre>
+
+== Пример ==
+{{TODO|Кто отвечает за сервер и как с ним связаться}}
+
+<templatedata>
+{
+	"description": "Заметная пометка о недостающей информации. Страница попадает в категорию «Страницы с TODO».",
+	"params": {
+		"1": {
+			"label": "Чего не хватает",
+			"description": "Какую информацию нужно дописать или у кого её узнать.",
+			"type": "string",
+			"suggested": true
+		}
+	},
+	"format": "inline"
+}
+</templatedata>
+[[Категория:Шаблоны]]
+</noinclude>

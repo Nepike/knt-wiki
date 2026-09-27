@@ -144,3 +144,6 @@ wfLoadExtension( 'ParserFunctions' );
 
 # Описание параметров шаблонов — VisualEditor показывает их как форму
 wfLoadExtension( 'TemplateData' );
+
+# Поле «Название → Создать страницу» с заготовкой (<inputbox> на странице «Как править вики»)
+wfLoadExtension( 'InputBox' );

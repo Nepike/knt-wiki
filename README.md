@@ -20,6 +20,7 @@
 | `scripts/gen_env.py` | Генерирует `.env` со случайными паролями и ключами |
 | `scripts/install.sh` | Первичная установка в пустую БД (таблицы + первый администратор) |
 | `scripts/backup.sh`, `scripts/restore.sh` | Бэкап и восстановление |
+| `scripts/deploy.sh` | Выкатка свежей конфигурации на сервере (`git pull` + перезапуск нужных контейнеров) |
 | `articles/` | Черновики статей (`.wiki`) |
 
 ## Локальный запуск
@@ -59,7 +60,7 @@ docker compose exec mediawiki php maintenance/run.php update --quick
 ## Расширения
 
 Подключены только одобренные (все входят в поставку MediaWiki):
-VisualEditor, SyntaxHighlight_GeSHi, ParserFunctions, TemplateData.
+VisualEditor, SyntaxHighlight_GeSHi, ParserFunctions, TemplateData, InputBox.
 
 ## Сервер
 
@@ -98,14 +99,18 @@ sudo certbot renew --dry-run --cert-name wiki.inbicst.ru
 
 ### Выкатить изменения конфигурации
 
+После push в GitHub:
+
 ```bash
 cd /srv/knt-wiki
-git pull
-docker compose up -d     # пересоздаст контейнеры, если менялся docker-compose.yml
+bash scripts/deploy.sh
 ```
 
-Изменения `LocalSettings.php` применяются сразу, без перезапуска. Если менялся конфиг nginx —
-скопируйте его снова и выполните `sudo nginx -t && sudo systemctl reload nginx`.
+Скрипт делает `git pull` и перезапускает контейнеры, чьи файлы изменились. Просто `git pull` **не хватит**:
+`LocalSettings.php` и другие конфиги смонтированы в контейнеры отдельными файлами, `git pull` заменяет их
+новыми, а контейнер продолжает видеть старые до перезапуска.
+
+Если менялся конфиг nginx — скопируйте его снова и выполните `sudo nginx -t && sudo systemctl reload nginx`.
 
 ## Бэкап
 
@@ -159,7 +164,7 @@ https://www.mediawiki.org/wiki/Version_lifecycle (используем LTS).
    ```bash
    cd /srv/knt-wiki
    bash scripts/backup.sh
-   git pull
+   bash scripts/deploy.sh
    docker compose pull && docker compose up -d
    docker compose exec mediawiki php maintenance/run.php update --quick
    ```
@@ -169,3 +174,53 @@ https://www.mediawiki.org/wiki/Version_lifecycle (используем LTS).
 
 MariaDB обновляется так же (тег `mariadb:11.8.x`); при смене минорной версии `mariadb-upgrade`
 запускается автоматически (`MARIADB_AUTO_UPGRADE`). Перед сменой мажорной версии — обязательно бэкап.
+
+## Статьи
+
+Черновики лежат в `articles/` в виде `.wiki`-файлов; публикуются в боевую вики скриптом
+`scripts/wiki.py` через MediaWiki API с бот-паролем.
+
+| Файл | Страница в вики |
+|---|---|
+| `articles/С чего начать.wiki` | С чего начать |
+| `articles/Шаблон/Статус страницы.wiki` | Шаблон:Статус страницы (первая папка — пространство имён) |
+
+### Бот-пароль (один раз)
+
+1. Войдите в вики под своей учётной записью с правами администратора.
+2. Откройте `Служебная:Пароли_ботов`, в поле «Название бота» введите `publisher`, нажмите «Создать».
+3. Отметьте разрешения: «Редактирование существующих страниц», «Создание, редактирование и переименование
+   страниц», «Правка пространства имён MediaWiki и пользовательских JSON» (для главной страницы и бокового меню).
+   «Основные права» включены всегда. Остальное не нужно.
+4. Нажмите «Создать». Вики один раз покажет логин вида `Участник@publisher` и пароль.
+5. Добавьте в свой локальный `.env` (в git он не попадает):
+   ```
+   WIKI_URL=https://wiki.inbicst.ru
+   WIKI_BOT_USER=Участник@publisher
+   WIKI_BOT_PASSWORD=...
+   ```
+
+Отозвать или пересоздать пароль можно там же, на `Служебная:Пароли_ботов`.
+
+### Работа с черновиками
+
+```bash
+python -m venv .venv && .venv/Scripts/pip install -r scripts/requirements.txt   # один раз (Linux: .venv/bin/pip)
+.venv/Scripts/python scripts/wiki.py check            # проверить вход, ничего не меняет
+.venv/Scripts/python scripts/wiki.py status           # какие черновики новые, изменены, в конфликте
+.venv/Scripts/python scripts/wiki.py pull "Название"  # скачать текущую версию страницы в articles/
+.venv/Scripts/python scripts/wiki.py diff "articles/Название.wiki"
+.venv/Scripts/python scripts/wiki.py publish "articles/Название.wiki" -m "что изменено"
+```
+
+Страницы часто правят прямо в браузере, поэтому скрипт **не перезаписывает вслепую**: в `articles/.sync.json`
+запоминается ревизия, с которой взят черновик. `publish` откажется сохранять, если страницу изменили в вики
+после `pull`, или если страница уже существует, а черновик не скачан из неё. Перед сохранением `publish`
+показывает diff и спрашивает подтверждение. `articles/.sync.json` стоит коммитить вместе с черновиками.
+
+### Правила для статей
+
+- В начале каждой статьи — `{{Статус страницы|ответственный=…|проверено=ГГГГ-ММ-ДД}}`.
+- Чего не знаем — помечаем `{{TODO|что именно}}`; все такие страницы собираются в `Категория:Страницы с TODO`.
+- Вики публичная: **никаких паролей, токенов и ключей** — только у кого или где их получить.
+  Логины, адреса и технические подробности устройства писать можно и нужно.
