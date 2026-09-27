@@ -1,0 +1,21 @@
+# Секреты — только локально/на сервере, в git не попадают
+.env
+*.env
+!.env.example
+
+# Бэкапы и дампы БД
+backups/
+*.sql
+*.sql.gz
+*.tar.gz
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Редакторы и ОС
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

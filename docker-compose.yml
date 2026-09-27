@@ -1,0 +1,60 @@
+name: itwiki
+
+# Общие настройки контейнера MediaWiki (используются сервисами mediawiki и installer)
+x-mediawiki: &mediawiki
+  image: mediawiki:1.43.9 # LTS-ветка MediaWiki
+  environment:
+    MW_SERVER: ${MW_SERVER}
+    MW_DB_NAME: ${MW_DB_NAME}
+    MW_DB_USER: ${MW_DB_USER}
+    MW_DB_PASSWORD: ${MW_DB_PASSWORD}
+    MW_SECRET_KEY: ${MW_SECRET_KEY}
+    MW_UPGRADE_KEY: ${MW_UPGRADE_KEY}
+
+services:
+  db:
+    image: mariadb:11.8.9 # LTS-ветка MariaDB
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${MW_DB_NAME}
+      MARIADB_USER: ${MW_DB_USER}
+      MARIADB_PASSWORD: ${MW_DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      # При обновлении минорной версии образа автоматически запускать mariadb-upgrade
+      MARIADB_AUTO_UPGRADE: "1"
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  mediawiki:
+    <<: *mediawiki
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${MW_BIND_ADDR:-127.0.0.1}:${MW_HTTP_PORT:-8080}:80"
+    volumes:
+      - ./LocalSettings.php:/var/www/html/LocalSettings.php:ro
+      - ./php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini:ro
+      - mw-images:/var/www/html/images
+
+  # Только для scripts/install.sh: установщик отказывается работать,
+  # если LocalSettings.php уже на месте, поэтому здесь он не монтируется.
+  installer:
+    <<: *mediawiki
+    profiles: ["install"]
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - mw-images:/var/www/html/images
+
+volumes:
+  db-data:
+  mw-images:
